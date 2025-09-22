@@ -44,8 +44,11 @@ class TextMatcher {
     // Perfect match
     if (query == target) return 1.0;
 
-    // Contains match
-    if (target.contains(query) || query.contains(target)) {
+    // Contains match - but only if the contained string is substantial
+    if (target.contains(query) && query.length >= 4) {
+      return 0.9;
+    }
+    if (query.contains(target) && target.length >= 4) {
       return 0.9;
     }
 
@@ -58,7 +61,8 @@ class TextMatcher {
       for (String tWord in targetWords) {
         if (qWord == tWord) {
           wordMatchScore += 1.0;
-        } else if (tWord.contains(qWord) || qWord.contains(tWord)) {
+        } else if ((tWord.contains(qWord) && qWord.length >= 4) ||
+            (qWord.contains(tWord) && tWord.length >= 4)) {
           wordMatchScore += 0.8;
         } else {
           // Fuzzy match for typos
@@ -94,7 +98,7 @@ class TextMatcher {
     'tea': ['chai', 'cha'],
     'chicken': ['chiken', 'chickin'],
     'paneer': ['panir', 'cottage cheese'],
-    'rice': ['chawal', 'bhat'],
+    'rice': ['chawal'], // Removed 'bhat' as it conflicts with 'bhature'
     'bread': ['roti', 'chapati', 'naan'],
   };
 

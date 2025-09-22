@@ -5,9 +5,9 @@ import '../utils/text_matcher.dart';
 import '../utils/location_utils.dart';
 
 class FoodDiscoveryAlgorithm {
-  static const double initialRadiusKm = 2.0;
-  static const double radiusIncrementKm = 1.0;
-  static const double maxRadiusKm = 10.0;
+  static const double initialRadiusKm = 5.0;
+  static const double radiusIncrementKm = 2.0;
+  static const double maxRadiusKm = 25.0;
   static const int targetRecommendations = 3;
 
   static List<Recommendation> findRecommendations({
@@ -111,8 +111,8 @@ class FoodDiscoveryAlgorithm {
         final priceScore = _calculatePriceScore(dish.price);
 
         // Combine scores - only include if text match is meaningful
-        if (maxSimilarity > 0.3) {
-          // Minimum text match threshold
+        if (maxSimilarity > 0.5) {
+          // Increased minimum text match threshold to prevent false matches
           final relevanceScore = _calculateRelevanceScore(
             textSimilarity: maxSimilarity,
             distanceScore: distanceScore,
@@ -180,7 +180,7 @@ class FoodDiscoveryAlgorithm {
           maxSimilarity = max(maxSimilarity, similarity);
         }
 
-        if (maxSimilarity > 0.3) {
+        if (maxSimilarity > 0.5) {
           scoredRemaining.add(_ScoredDish(
             dish: dish,
             distance: distance,
@@ -222,29 +222,8 @@ class FoodDiscoveryAlgorithm {
   ) {
     if (userPreference == null) return true;
 
-    switch (userPreference) {
-      case DietaryPreference.nonVeg:
-        // Non-veg users can eat anything
-        return true;
-      case DietaryPreference.eggetarian:
-        // Eggetarians can eat veg, vegan, jain, and eggetarian
-        return dishType == DietaryPreference.veg ||
-            dishType == DietaryPreference.vegan ||
-            dishType == DietaryPreference.jain ||
-            dishType == DietaryPreference.eggetarian;
-      case DietaryPreference.veg:
-        // Vegetarians can eat veg, vegan, and jain
-        return dishType == DietaryPreference.veg ||
-            dishType == DietaryPreference.vegan ||
-            dishType == DietaryPreference.jain;
-      case DietaryPreference.vegan:
-        // Vegans can only eat vegan and jain
-        return dishType == DietaryPreference.vegan ||
-            dishType == DietaryPreference.jain;
-      case DietaryPreference.jain:
-        // Jains can only eat jain food
-        return dishType == DietaryPreference.jain;
-    }
+    // Show only dishes that exactly match the selected dietary preference
+    return dishType == userPreference;
   }
 
   static double _calculatePriceScore(double price) {
@@ -264,11 +243,11 @@ class FoodDiscoveryAlgorithm {
     required double ratingScore,
     required double priceScore,
   }) {
-    // Weighted combination
-    return (textSimilarity * 0.5) +
-        (distanceScore * 0.2) +
-        (ratingScore * 0.2) +
-        (priceScore * 0.1);
+    // Weighted combination - prioritize text relevance over distance
+    return (textSimilarity * 0.7) +
+        (distanceScore * 0.1) +
+        (ratingScore * 0.15) +
+        (priceScore * 0.05);
   }
 }
 

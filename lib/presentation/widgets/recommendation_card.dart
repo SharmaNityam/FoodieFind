@@ -137,29 +137,56 @@ class RecommendationCard extends StatelessWidget {
                               Text(
                                 'Match Score',
                                 style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.grey[600],
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.grey[700],
                                 ),
                               ),
-                              Text(
-                                '${(recommendation.relevanceScore * 100).toStringAsFixed(0)}%',
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                  color: Color(0xFF6C63FF),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: _getScoreColor(
+                                          recommendation.relevanceScore)
+                                      .withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                    color: _getScoreColor(
+                                            recommendation.relevanceScore)
+                                        .withOpacity(0.3),
+                                    width: 1,
+                                  ),
+                                ),
+                                child: Text(
+                                  '${(recommendation.relevanceScore * 100).toStringAsFixed(0)}%',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    color: _getScoreColor(
+                                        recommendation.relevanceScore),
+                                  ),
                                 ),
                               ),
                             ],
                           ),
                           const SizedBox(height: 4),
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(4),
-                            child: LinearProgressIndicator(
-                              value: recommendation.relevanceScore,
-                              minHeight: 6,
-                              backgroundColor: const Color(0xFFE5E7EB),
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                _getScoreColor(recommendation.relevanceScore),
+                          Container(
+                            height: 8,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(4),
+                              color: const Color(0xFFE5E7EB),
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(4),
+                              child: LinearProgressIndicator(
+                                value: recommendation.relevanceScore,
+                                minHeight: 8,
+                                backgroundColor: Colors.transparent,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  _getScoreColor(recommendation.relevanceScore),
+                                ),
                               ),
                             ),
                           ),
@@ -345,36 +372,95 @@ class RecommendationCard extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               ...recommendation.scoreBreakdown.entries.map((entry) {
-                String label = entry.key
-                    .replaceAll(RegExp(r'([A-Z])'), ' \$1')
-                    .trim()
-                    .split(' ')
-                    .map((word) => word[0].toUpperCase() + word.substring(1))
-                    .join(' ');
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
+                // Use clean, user-friendly labels with icons
+                final labelData = {
+                  'textSimilarity': {
+                    'label': 'Text Match',
+                    'icon': Icons.text_fields,
+                    'color': const Color(0xFF00B894)
+                  },
+                  'distanceScore': {
+                    'label': 'Distance',
+                    'icon': Icons.location_on,
+                    'color': const Color(0xFF6C63FF)
+                  },
+                  'ratingScore': {
+                    'label': 'Rating',
+                    'icon': Icons.star,
+                    'color': const Color(0xFFFDAB3D)
+                  },
+                  'priceScore': {
+                    'label': 'Price',
+                    'icon': Icons.attach_money,
+                    'color': const Color(0xFFFF6B6B)
+                  },
+                };
+                final data = labelData[entry.key];
+                final label = data?['label'] as String? ?? entry.key;
+                final icon = data?['icon'] as IconData? ?? Icons.info;
+                final color =
+                    data?['color'] as Color? ?? const Color(0xFF6C63FF);
+                final percentage = (entry.value * 100).toStringAsFixed(0);
+
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: color.withOpacity(0.05),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: color.withOpacity(0.2),
+                      width: 1,
+                    ),
+                  ),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        label,
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey[600],
+                      Container(
+                        width: 32,
+                        height: 32,
+                        decoration: BoxDecoration(
+                          color: color.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Icon(
+                          icon,
+                          size: 18,
+                          color: color,
                         ),
                       ),
-                      Text(
-                        '${(entry.value * 100).toStringAsFixed(0)}%',
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF6C63FF),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          label,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.grey[700],
+                          ),
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: color.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          '$percentage%',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            color: color,
+                          ),
                         ),
                       ),
                     ],
                   ),
                 );
-              }).toList(),
+              }),
               const SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
