@@ -5,8 +5,8 @@ import '../utils/text_matcher.dart';
 import '../utils/location_utils.dart';
 
 class FoodDiscoveryAlgorithm {
-  static const double initialRadiusKm = 5.0;
-  static const double radiusIncrementKm = 2.0;
+  static const double initialRadiusKm = 2.0;
+  static const double radiusIncrementKm = 3.0;
   static const double maxRadiusKm = 25.0;
   static const int targetRecommendations = 3;
 
